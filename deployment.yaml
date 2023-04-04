@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interceptor-backend-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: interceptor-backend-v1
+  template:
+    metadata:
+      labels:
+        app: interceptor-backend-v1
+    spec:
+      containers:
+        - name: interceptor-backend-v1
+          image: interceptor-service:latest
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interceptor-backend-v1
+spec:
+  selector:
+    app: interceptor-backend-v1
+  ports:
+    - name: http
+      port: 9081
+      targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: dp.wso2.com/v1alpha1
+kind: Backend
+metadata:
+  name: interceptor-backend-v1
+spec:
+  protocol: http
+  services:
+    - host: interceptor-backend-v1.apk
+      port: 9081
+  # tls:
+  #   secretRef:
+  #     name: interceptor-cert-secret
+  #     key: ca.crt
